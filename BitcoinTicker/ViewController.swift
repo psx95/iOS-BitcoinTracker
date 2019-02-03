@@ -14,6 +14,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     let baseURL = "https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC"
     let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
+    let currencySymbols = ["$", "R$", "$", "¥", "€", "£", "$", "Rp", "₪", "₹", "¥", "$", "kr", "$", "zł", "lei", "₽", "kr", "$", "$", "R"]
     var finalURL = ""
 
     //Pre-setup IBOutlets
@@ -48,16 +49,14 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        print (currencyArray[row])
-        
         finalURL = baseURL + currencyArray[row]
-        getBitcoinData(url: finalURL)
+        getBitcoinData(url: finalURL, position: row)
     }
 //    
 //    //MARK: - Networking
 //    /***************************************************************/
     
-    func getBitcoinData(url: String) {
+    func getBitcoinData(url: String, position: Int) {
         showLoadingViews()
         Alamofire.request(url, method: .get)
             .responseJSON { response in
@@ -65,7 +64,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     self.hideLoadingViews()
                    // self.loadingAnimator.stopAnimating()
                     let bitcoinJSON : JSON = JSON(response.result.value!)
-                    self.updateBitcoinJSON(json: bitcoinJSON)
+                    self.updateBitcoinJSON(json: bitcoinJSON, position: position)
 
                 } else {
                     self.hideLoadingViews()
@@ -84,10 +83,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     //MARK: - JSON Parsing
     /***************************************************************/
     
-    func updateBitcoinJSON(json : JSON) {
+    func updateBitcoinJSON(json : JSON, position : Int) {
         
         if let priceResult = json["ask"].double {
-            bitcoinPriceLabel.text = String(priceResult)
+            bitcoinPriceLabel.text = "\(currencySymbols[position]) \(priceResult)"
         } else {
             bitcoinPriceLabel.text = "N/A"
         }
